@@ -172,6 +172,32 @@ public class Item implements IZUGFeRDExportableItem {
 			icnm.getAsNodeMap("ApplicableTradeTax")
 				.flatMap(cnm -> cnm.getAsBigDecimal("RateApplicablePercent", "ApplicablePercent"))
 				.ifPresent(product::setVATPercent);
+			icnm.getAsNodeMap("SpecifiedTradeAllowanceCharge").ifPresent(stac -> {
+				stac.getAsNodeMap("ChargeIndicator").ifPresent(ci -> {
+					String isChargeString=ci.getAsString("Indicator").get();
+					String percentString=stac.getAsStringOrNull("CalculationPercent");
+					String amountString=stac.getAsStringOrNull("ActualAmount");
+					String reason=stac.getAsStringOrNull("Reason");
+					Charge izac= new Charge();
+					if (isChargeString.equalsIgnoreCase("false")) {
+						izac = new Allowance();
+					} else {
+						izac = new Charge();
+					}
+					if (amountString!=null) {
+						izac.setTotalAmount(new BigDecimal(amountString));
+					}
+					izac.setPercent(new BigDecimal(percentString));
+					izac.setReason(reason);
+
+					if (isChargeString.equalsIgnoreCase("false")) {
+						addAllowance(izac);
+					} else {
+						addCharge(izac);
+					}
+				});
+
+			});
 
 			if (recalcPrice && !BigDecimal.ZERO.equals(quantity)) {
 				icnm.getAsNodeMap("SpecifiedTradeSettlementLineMonetarySummation")
@@ -352,7 +378,7 @@ public class Item implements IZUGFeRDExportableItem {
 
 	/***
 	 * Adds a item level addition to the price (will be multiplied by quantity)
-	 * @see org.mustangproject.Charge
+	 * @see Charge
 	 * @param izac a relative or absolute charge
 	 * @return fluent setter
 	 */
@@ -363,7 +389,7 @@ public class Item implements IZUGFeRDExportableItem {
 
 	/***
 	 * Adds a item level reduction the price (will be multiplied by quantity)
-	 * @see org.mustangproject.Allowance
+	 * @see Allowance
 	 * @param izac a relative or absolute allowance
 	 * @return fluent setter
 	 */
@@ -383,10 +409,23 @@ public class Item implements IZUGFeRDExportableItem {
 		}
 		notes.add(text);
 
+		addNote(IncludedNote.unspecifiedNote(text));
+
+
+		return this;
+	}
+
+	/***
+	 * adds categorized item level freetext fields (includednote)
+	 * @param theNote IncludedNote to add
+	 * @return fluent setter
+	 */
+	public Item addNote(IncludedNote theNote) {
+
 		if (includedNotes == null) {
 			includedNotes = new ArrayList<>();
 		}
-		includedNotes.add(IncludedNote.unspecifiedNote(text));
+		includedNotes.add(theNote);
 
 
 		return this;

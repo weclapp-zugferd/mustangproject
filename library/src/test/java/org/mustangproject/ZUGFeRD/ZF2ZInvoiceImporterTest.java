@@ -40,7 +40,6 @@ import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -102,6 +101,7 @@ public class ZF2ZInvoiceImporterTest extends ResourceCase {
 		// name street location zip country, contact name phone email, total amount
 
 	}
+
 
 	public void testInvoiceImportUBL() {
 
@@ -465,5 +465,13 @@ public class ZF2ZInvoiceImporterTest extends ResourceCase {
 		assertEquals(1, invoice.getZFItems().length);
 		assertFalse(invoice.getZFItems()[0].getNotes() == null);
 		assertEquals(1, invoice.getZFItems()[0].getNotes().length);
+	}
+
+	@Test
+	public void testImportXRechnungWithoutCalculationErrors() throws FileNotFoundException, XPathExpressionException, ParseException {
+		File inputFile = getResourceAsFile("cii/02.03a-INVOICE_uncefact.xml");
+		ZUGFeRDInvoiceImporter zii = new ZUGFeRDInvoiceImporter(new FileInputStream(inputFile));
+
+		assertEquals("0", zii.importedInvoice.getDuePayable().toPlainString());
 	}
 }
