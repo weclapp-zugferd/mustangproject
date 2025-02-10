@@ -88,13 +88,13 @@ public class XRTest extends TestCase {
 
 		FileAttachment fe1 = new FileAttachment("one.pdf", "application/pdf", "Alternative", b);
 		Invoice i = new Invoice().setDueDate(new Date()).setIssueDate(new Date()).setDeliveryDate(new Date())
-			.setSender(new TradeParty(orgname, "teststr", "55232", "teststadt", "DE").setEmail("sender@example.com").addTaxID("DE4711").addVATID("DE0815").setContact(new Contact("Hans Test", "+49123456789", "test@example.org")).addBankDetails(new BankDetails("DE12500105170648489890", "COBADEFXXX")))
+			.setSender(new TradeParty(orgname, "teststr", "55232", "teststadt", "DE").setEmail("sender@example.com").addTaxID("DE4711").addVATID("DE0815").setContact(new Contact("Hans Test", "+49123456789", "test@example.org")).addBankDetails(new BankDetails("DE12500105170648489890", "COBADEFXXX").setAccountName("kontoInhaber")))
 			.setRecipient(new TradeParty("Franz Müller", "teststr.12", "55232", "Entenhausen", "DE").setEmail("recipient@sample.org"))
 			.addCashDiscount(new CashDiscount(new BigDecimal(2), 7))
 			.addCashDiscount(new CashDiscount(new BigDecimal(3), 14))
 			.setReferenceNumber("991-01484-64")//leitweg-id
 			// not using any VAT, this is also a test of zero-rated goods:
-			.setNumber(number).addItem(new Item(new Product("Testprodukt", "", "C62", BigDecimal.ZERO), amount, new BigDecimal(1.0)))
+			.setNumber(number).addItem(new Item(new Product("Testprodukt", "", "C62", BigDecimal.ZERO).setTaxExemptionReason("Kleinunternehmer"), amount, new BigDecimal(1.0)))
 			.setPayee( new TradeParty().setName("VR Factoring GmbH").setID("DE813838785").setLegalOrganisation(new LegalOrganisation("391200LDDFJDMIPPMZ54", "0199")))
 			.embedFileInXML(fe1);
 
